@@ -10,8 +10,10 @@ const seedStationsHandler = async(req:Request,res:Response)=>{
 
 }
 const getStationsHandler =async (req:Request,res:Response)=>{
+    const {search, stationName , stationCode} = req.query;
 
-    const seededStations = await getStations()
+
+    const seededStations = await getStations(search as string , stationName as string , stationCode as string)
 
     return res.status(200).json(seededStations)
 
