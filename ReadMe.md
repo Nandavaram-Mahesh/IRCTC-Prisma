@@ -1,23 +1,4 @@
-
-
-
-Roadmap: From Beginner → Advanced Prisma (IRCTC Project)
-
-We'll build the system in 9 progressive stages.
-
-| Stage | Topic               | Prisma Concepts               |
-| ----- | ------------------- | ----------------------------- |
-| 1     | Domain design       | ER modelling, schema thinking |
-| 2     | Core models         | relations, indexes            |
-| 3     | User system         | auth, constraints             |
-| 4     | Train scheduling    | composite keys                |
-| 5     | Seat inventory      | transactions                  |
-| 6     | Booking engine      | nested writes                 |
-| 7     | Availability search | complex queries               |
-| 8     | Pricing & quotas    | computed logic                |
-| 9     | Production patterns | performance & scaling         |
-
-
+This is a learning project
 //////////////////////////////////////////////////
 // USER
 //////////////////////////////////////////////////
