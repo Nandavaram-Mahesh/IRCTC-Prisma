@@ -1,0 +1,227 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Get a free hosted Postgres database in seconds: `npx create-db`
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+//////////////////////////////////////////////////
+// USER
+//////////////////////////////////////////////////
+model User {
+  id String   @id @default(cuid())
+  name String 
+  email String @unique
+  password String
+
+  bookings   Booking[]
+
+  createdAt DateTime @default(now()) // set once on creation
+  updatedAt DateTime @updatedAt // auto-updated on every change
+}
+//////////////////////////////////////////////////
+// STATION
+//////////////////////////////////////////////////
+model Station {
+  id   String @id @default(cuid())
+  name String
+  code String @unique
+  city String
+
+  trainRouteStops TrainRouteStop[]   // Junction table of Train <-> Station (Many to Many Table) with extra fields(arrival Time , departure time , stopNumber)
+}
+//////////////////////////////////////////////////
+// TRAIN
+//////////////////////////////////////////////////
+model Train{
+  id String @id @default(cuid())
+  number String @unique
+  name   String
+
+  trainRouteStops TrainRouteStop[]
+  coaches Coach[]
+  runs    TrainRun[]
+}
+//////////////////////////////////////////////////
+// ROUTE STOPS (TRAIN ↔ STATION) JunctionTable
+//////////////////////////////////////////////////
+model TrainRouteStop{
+  id        String @id @default(cuid())
+
+  trainId   String
+  stationId String
+
+  stopNumber Int
+
+  arrivalTime   DateTime?
+  departureTime DateTime?
+
+  train Train @relation(fields: [trainId],references: [id])
+  station Station @relation(fields:[stationId],references: [id])
+
+  @@unique([trainId, stopNumber])   //Prisma will throw an error if you try to create two records with the same trainId + stopNumber combination.
+}
+//////////////////////////////////////////////////
+// TRAIN RUN (TRAIN INSTANCE PER DATE)
+//////////////////////////////////////////////////
+model TrainRun{
+  id String @id @default(cuid())
+  trainId String
+  date    DateTime
+
+  train Train @relation(fields: [trainId], references: [id])
+  
+  bookings Booking[]
+
+  createdAt DateTime @default(now())
+  
+  @@unique([trainId, date])
+}
+//////////////////////////////////////////////////
+// COACH
+//////////////////////////////////////////////////
+model Coach {
+  id      String @id @default(cuid())
+  trainId String
+
+  number String
+  type   CoachType
+
+  train Train @relation(fields: [trainId], references: [id])
+
+  seats Seat[]
+
+  @@unique([trainId, number])
+}
+//////////////////////////////////////////////////
+// SEAT
+//////////////////////////////////////////////////
+model Seat {
+  id      String @id @default(cuid())
+  coachId String
+
+  seatNo Int
+  berth  BerthType
+
+  coach Coach @relation(fields: [coachId], references: [id])
+
+  tickets Ticket[]
+
+  @@unique([coachId, seatNo])
+}
+//////////////////////////////////////////////////
+// BOOKING
+//////////////////////////////////////////////////
+model Booking {
+  id         String @id @default(cuid())
+  userId     String
+  trainRunId String
+
+  status BookingStatus
+
+  user     User     @relation(fields: [userId], references: [id])
+  trainRun TrainRun @relation(fields: [trainRunId], references: [id])
+
+  passengers Passenger[]
+  tickets    Ticket[]
+  payment    Payment?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+//////////////////////////////////////////////////
+// PASSENGER
+//////////////////////////////////////////////////
+model Passenger {
+  id        String @id @default(cuid())
+  bookingId String
+
+  name   String
+  age    Int
+  gender Gender
+
+  booking Booking @relation(fields: [bookingId], references: [id])
+
+  ticket Ticket?
+}
+//////////////////////////////////////////////////
+// TICKET (SEAT ALLOCATION)
+//////////////////////////////////////////////////
+model Ticket {
+  id          String @id @default(cuid())
+
+  bookingId   String
+  passengerId String @unique
+  seatId      String
+
+  booking   Booking   @relation(fields: [bookingId], references: [id])
+  passenger Passenger @relation(fields: [passengerId], references: [id])
+  seat      Seat      @relation(fields: [seatId], references: [id])
+
+  createdAt DateTime @default(now())
+}
+//////////////////////////////////////////////////
+// PAYMENT
+//////////////////////////////////////////////////
+model Payment {
+  id        String @id @default(cuid())
+  bookingId String @unique
+
+  amount  Float
+  status  PaymentStatus
+  method  PaymentMethod
+
+  booking Booking @relation(fields: [bookingId], references: [id])
+
+  createdAt DateTime @default(now())
+}
+//////////////////////////////////////////////////
+// ENUMS
+//////////////////////////////////////////////////
+enum CoachType {
+  SL
+  AC3
+  AC2
+  AC1
+}
+
+enum BerthType {
+  LOWER
+  MIDDLE
+  UPPER
+  SIDE_LOWER
+  SIDE_UPPER
+}
+
+enum BookingStatus {
+  PENDING
+  CONFIRMED
+  CANCELLED
+}
+
+enum Gender {
+  MALE
+  FEMALE
+  OTHER
+}
+
+enum PaymentStatus {
+  PENDING
+  SUCCESS
+  FAILED
+  REFUNDED
+}
+
+enum PaymentMethod {
+  UPI
+  CARD
+  NETBANKING
+  WALLET
+}
