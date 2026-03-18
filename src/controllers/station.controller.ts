@@ -10,12 +10,20 @@ const seedStationsHandler = async(req:Request,res:Response)=>{
 
 }
 const getStationsHandler =async (req:Request,res:Response)=>{
-    const {search, stationName , stationCode} = req.query;
+    const {search, stationName , stationCode , page ,limit} = req.query;
 
 
-    const seededStations = await getStations(search as string , stationName as string , stationCode as string)
+    const {stations,totalCount} = await getStations(search as string , stationName as string , stationCode as string, page as string,limit as string )
 
-    return res.status(200).json(seededStations)
+    return res.json({
+        data: stations,
+        meta: {
+            totalCount,
+            page: Number(page),
+            limit: Number(limit),
+            totalPages: Math.ceil(totalCount / Number(limit))
+        }
+        });
 
 }
 const getStaionHandler = async (req:Request,res:Response)=>{

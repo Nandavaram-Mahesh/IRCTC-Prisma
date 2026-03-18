@@ -12,7 +12,7 @@ const seedStations = async(stations:any)=>{
 
 }
 
-const getStations=async(search:string,statioName:string,statioCode:string)=>{
+const getStations=async(search:string,statioName:string,statioCode:string,page:string,limit:string)=>{
 
     // If user types "CHE" → matches code like CHE
 
@@ -24,6 +24,19 @@ const getStations=async(search:string,statioName:string,statioCode:string)=>{
 
     // "Global search" / "fuzzy search"
 
+
+    // 🧠 Mental Model (REMEMBER THIS)
+    // 1. WHERE → filter/search
+    // 2. ORDER → sort
+    // 3. SKIP → jump
+    // 4. TAKE → limit
+
+    const pageNum = Number(page)|| 1
+    const limitNum  = Number(limit) || 10
+
+    const skip = (pageNum - 1) * limitNum;
+
+
     const where:Prisma.StationWhereInput = {
         AND:[search ? {
                 OR:[
@@ -33,12 +46,23 @@ const getStations=async(search:string,statioName:string,statioCode:string)=>{
                 }:{},
             statioName ? { name: { contains: statioName, mode: Prisma.QueryMode.insensitive } } : {},
             statioCode ? {code:{ contains: statioCode, mode: Prisma.QueryMode.insensitive }}:{}
-]
-}
-    
-    const stations = await prisma.station.findMany({where})
+            ]
+    }
 
-    return stations
+
+    
+    const [stations,totalCount] = await prisma.$transaction([
+        prisma.station.findMany({
+            where,
+            orderBy: { name: "asc" },
+            skip,       // 📄 then paginate
+            take: limitNum
+        }),
+        prisma.station.count({where})
+    ]);
+        
+
+    return { stations, totalCount }
 
 }
 
