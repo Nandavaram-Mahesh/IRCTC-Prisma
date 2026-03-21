@@ -1,5 +1,5 @@
 import express from 'express'
-import { createUserHandler,deleteUserHandler,getUserHandler,getUsersHandler, updateUserHandler } from '../controllers/user.controller.js'
+import { createUserHandler,deleteUserHandler,getUserHandler,getUsersHandler, updateUserHandler } from '../../controllers/user.controller.js'
 
 
 const router = express.Router()
@@ -15,4 +15,4 @@ router.patch('/:userId',updateUserHandler)
 
 router.delete('/:userId',deleteUserHandler)
 
-export {router}
+export default router

@@ -1,4 +1,6 @@
 import type {Request,Response,NextFunction} from 'express'
+// import StatusCodes  from 'http-status-codes'
+
 import { seedStations,getStations,getStation } from '../services/station.service.js'
 
 const seedStationsHandler = async(req:Request,res:Response)=>{
@@ -15,7 +17,10 @@ const getStationsHandler =async (req:Request,res:Response)=>{
 
     const {stations,totalCount} = await getStations(search as string , stationName as string , stationCode as string, page as string,limit as string )
 
-    return res.json({
+    return res.status(200).json({
+        success:true,
+        message:'Fetched stations successfully',
+        error:{},
         data: stations,
         meta: {
             totalCount,
@@ -24,6 +29,8 @@ const getStationsHandler =async (req:Request,res:Response)=>{
             totalPages: Math.ceil(totalCount / Number(limit))
         }
         });
+
+
 
 }
 const getStaionHandler = async (req:Request,res:Response)=>{

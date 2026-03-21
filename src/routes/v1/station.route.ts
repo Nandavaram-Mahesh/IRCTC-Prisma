@@ -1,5 +1,5 @@
 import express from 'express'
-import { getStationsHandler, seedStationsHandler,getStaionHandler } from '../controllers/station.controller.js'
+import { getStationsHandler, seedStationsHandler,getStaionHandler } from '../../controllers/station.controller.js'
 
 
 const router = express.Router()
@@ -8,4 +8,5 @@ const router = express.Router()
 router.get('/',getStationsHandler)
 router.get('/:stationCode',getStaionHandler)
 router.post('/bulk',seedStationsHandler)
-export {router}
+
+export default router
